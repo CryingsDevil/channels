@@ -62,7 +62,6 @@ int ch_setup(){
 }
 
 int ch_send(int channel, void* msg){
-	// puts("ch_send working");
 	int locked = 0;
 	while(!locked){
 		locked = pthread_mutex_trylock(&channels[channel]->message);
@@ -80,7 +79,6 @@ int ch_send(int channel, void* msg){
 }
 
 int ch_recv(int channel, void** dest){
-	// puts("ch_recv working");
 	int locked = 0;
 	while(!locked){
 		locked = pthread_mutex_trylock(&channels[channel]->recv);
