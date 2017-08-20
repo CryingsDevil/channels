@@ -21,17 +21,12 @@ void *working(int *id){
 	int locked = 0;
 	while(1){
 		while(!locked)locked =	pthread_mutex_trylock(&channels[cid]->recv);
-		locked = 0;
-		// printf("channel%d: waiting for message\n", cid);
+		locked = 0;		
 		while(!channels[cid]->hadMessage);
 		pthread_mutex_unlock(&channels[cid]->recv);
-		// printf("channel%d: recved message waiting for recving\n", cid);
-		// if(channels[cid]->item == NULL)puts("We get an empty message");
 		while(!locked)locked = pthread_mutex_trylock(&channels[cid]->message);
-		// printf("channel%d: recved message and message is sending\n",cid);
 		locked = 0;
 		while(channels[cid]->hadMessage);
-		// printf("channel%d: recved messages and finished sending, waiting for message again\n",cid);
 		pthread_mutex_unlock(&channels[cid]->message);
 	}
 }
@@ -72,18 +67,11 @@ int ch_send(int channel, void* msg){
 	while(!locked){
 		locked = pthread_mutex_trylock(&channels[channel]->message);
 		if(locked){
-			// puts("ch_send locked");
-	
-			// channels[channel]->item = msg;
 			channels[channel]->item = (void*)malloc(sizeof((void*) msg));
-			// channels[channel]->item = (void*)malloc(msg);
-
 			channels[channel]->item = msg;
 			msg = NULL;
-			free(msg);
-		
+			free(msg);		
 			channels[channel]->hadMessage = 1;
-			// puts("ch_send finished");
 			pthread_mutex_unlock(&channels[channel]->message);
 		}
 	}
@@ -98,21 +86,11 @@ int ch_recv(int channel, void** dest){
 		locked = pthread_mutex_trylock(&channels[channel]->recv);
 		if(locked){
 			if(channels[channel]->hadMessage == 1){
-				// puts("locked");
-				// void* instant = channels[channel]->item;
 				*dest = (void*)malloc(sizeof((void*) channels[channel]->item)); 
-				// *dest = (void*)malloc((void*) channels[channel]->item); 
-				// dest = malloc(sizeof(*channels[channel]->item));
-				// puts("get message");
-				// dest = instant;
-				// if(channels[channel]->item == NULL)puts("ch_recv: We get an empty message");
 				*dest = channels[channel]->item;
-				// if(dest != NULL)puts("dest had been set");
 				channels[channel]->item = NULL;
-				free(channels[channel]->item);
-				// if(dest == NULL)puts("channels had been free");
+				free(channels[channel]->item;
 				channels[channel]->hadMessage = 0;
-				// puts("recv finshed");
 			}else{
 				locked = 0;
 			}
@@ -126,10 +104,8 @@ int ch_recv(int channel, void** dest){
 
 
 int ch_tryrecv(int channel, void** dest){
-	// puts("ch_tryrecv working");
 	if(channels[channel]->hadMessage == 1){
 		if(pthread_mutex_trylock(&channels[channel]->recv) == 0){
-			// dest = malloc(sizeof(channels[channel]->item));
 			*dest = channels[channel]->item;
 			channels[channel]->item = NULL;
 			free(channels[channel]->item);
