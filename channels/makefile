@@ -9,7 +9,7 @@ use:
 	@echo "Use: make [producer|pipeline|clean]"
 
 CC=gcc -g -std=gnu99 -Wall -Werror
-LIB=-lpthread -lrt
+LIB=-lpthread -lrt -pthread
 
 producer: channels.o producer.c
 	$(CC) $(LIB) channels.o producer.c -o producer

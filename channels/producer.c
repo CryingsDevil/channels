@@ -41,6 +41,7 @@ void* producer(void* param) {
             abort();
         }
         message *message = malloc(sizeof(message));
+     
         if (message == NULL) { puts("Out of memory"); abort(); }
         message->type = MSG_ITEM;
         message->item_number = i + 1;
@@ -48,6 +49,7 @@ void* producer(void* param) {
 
         /* add it to the channel */
         err = ch_send(ITEM_CHANNEL, message);
+
         if (err) { puts("Failed to add item"); abort(); }
     }
 
