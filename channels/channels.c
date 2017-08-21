@@ -13,7 +13,6 @@ typedef struct{
 	pthread_cond_t condR;
 	pthread_cond_t condCS; 
 	pthread_cond_t condCR;
-
 	pthread_mutex_t send;
 	pthread_mutex_t recv;
 	void* item;
