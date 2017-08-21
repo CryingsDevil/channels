@@ -43,7 +43,7 @@ int ch_setup(){
 		
 		
 		}else{
-			puts("No enough memory!");
+			printf("No enough memory to create Channel %d!\n",i);
 		}
 		
 	}
@@ -63,6 +63,10 @@ int ch_send(int channel, void* msg){
 		pthread_mutex_lock(&channels[channel]->send);
 		while(channels[channel]->hadMessage == 1)pthread_cond_wait(&channels[channel]->condS,&channels[channel]->send);
 		channels[channel]->item = (void*)malloc(sizeof((void*) msg));
+		if(channels[channel]->item == NULL){
+			puts("Cannot send message: No enough memory to store!");
+			return -1;
+		}
 		channels[channel]->item = msg;
 		msg = NULL;
 		free(msg);
@@ -81,6 +85,10 @@ int ch_recv(int channel, void** dest){
 		pthread_mutex_lock(&channels[channel]->recv);
 		while(channels[channel]->hadMessage == 0)pthread_cond_wait(&channels[channel]->condR,&channels[channel]->recv);
 		*dest = (void*)malloc(sizeof((void*) channels[channel]->item));
+		if(*dest == NULL){
+			puts("Cannot receive message: No enough memory!");
+			return -1;
+		}
 		*dest = channels[channel]->item;
 		channels[channel]->item = NULL;
 		free(channels[channel]->item);
