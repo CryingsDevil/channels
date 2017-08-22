@@ -232,5 +232,6 @@ int main(void) {
     printf("Mutex destroyed: %s\n",strerror(pthread_mutex_destroy(&mtx)));
     printf("Condition destroyed: %s\n",strerror(pthread_cond_destroy(&cond)));
     return 1;
+    
 }
 
