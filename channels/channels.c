@@ -245,6 +245,7 @@ int ch_tryrecv(int channel, void** dest){
 				channels[channel]->item = NULL;
 				free(channels[channel]->item);
 				channels[channel]->hadMessage = 0;
+				pthread_cond_broadcast(&channels[channel]->condS);
 				pthread_mutex_unlock(&channels[channel]->recv);
 				return 1;
 			}else{
