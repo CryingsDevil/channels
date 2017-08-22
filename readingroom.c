@@ -9,11 +9,10 @@
 
 static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;  
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;  
-// static pthread_mutex_t writerLocker = PTHREAD_MUTEX_INITIALIZER;
 static int isWriterIn = 0;
 static int peopleInRoom = 0;
-// static int peopleWaiting = 0;
 static int isWriterWait = 0;
+
 /* Do not change this code. */
 
 struct timeval time0;
@@ -62,37 +61,19 @@ void* reader(void* p) {
 
     /* Print this line when a new reader is created, before any synchronisation operations. */
     printf("%i: New reader %i (delay=%i).\n", now(), i.id, i.delay);
-    int success = -1;
-    // pthread_mutex_t readerC;
-    // int success = pthread_mutex_init(&readerC, NULL);
-    // if(success < 0){
-    //     printf("No enough memory for reader %d.", i.id);
-    //     return NULL;
-    // }
-
-    // pthread_mutex_lock(&readerC);
-    // success = -1;
+    
     /* This line must be printed only if the reader has to wait. */
     if(isWriterIn == 1 || isWriterWait > 0){
-        // while(success < 0)success = pthread_mutex_trylock(&mtx);
         pthread_mutex_lock(&mtx);
-        // peopleWaiting++;
         printf("%i: Reader %i waiting ...\n", now(), i.id);
-        
-        while(isWriterIn == 1 || isWriterWait > 0){
-            // printf("%d REader still waiting\n", i.id);
-            pthread_cond_wait(&cond, &mtx);
-        }
+        while(isWriterIn == 1 || isWriterWait > 0)pthread_cond_wait(&cond, &mtx);
         pthread_mutex_unlock(&mtx); 
     }
     
     
 
     /* Print this line when the reader enters the room. */
-    success = -1;
-    // while(success < 0)success = pthread_mutex_trylock(&mtx);
     pthread_mutex_lock(&mtx);
-    // peopleWaiting--;
     peopleInRoom++;
     printf("%i: Reader %i enters room.\n", now(), i.id);
     pthread_mutex_unlock(&mtx);
@@ -102,19 +83,12 @@ void* reader(void* p) {
     read_documents(i.delay, i.id);
 
     /* Print this line when the reader leaves the room. */
-    success = -1;
-    // while(success < 0)success = pthread_mutex_trylock(&mtx);
     pthread_mutex_lock(&mtx);
     peopleInRoom--;
     printf("%i: Reader %i leaves room.\n", now(), i.id);
     pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&mtx);
     
-    // pthread_mutex_unlock(&readerC);
-    // if(pthread_mutex_destroy(&readerC) != 0){
-    //     printf("Reader %i cannot destroy its mutex.\n", i.id);
-    // }
-    // printf("-----------------Reader  %d closed.\n", i.id);
     return NULL;
 }
 
@@ -125,35 +99,18 @@ void* writer(void* p) {
 
     /* Print this line before the first synchronisation operation. */
     printf("%i: New writer %i (delay=%i).\n", now(), i.id, i.delay);
-    int success = -1;
-    // pthread_mutex_t writerLock;
-    // int success = pthread_mutex_init(&writerLock, NULL);
-    // if(success < 0){
-    //     printf("No enough memory for writer %d.\n",i.id);
-    //     return NULL;
-    // }   
-    // pthread_mutex_lock(&writerLock);
-    /* Print this line only if the writer has to wait. */
-    // success = -1;
     if(peopleInRoom > 0){
-        // while(success < 0)success = pthread_mutex_trylock(&mtx);
         pthread_mutex_lock(&mtx);
         isWriterWait++;
         printf("%i: Writer %i waiting ...\n", now(), i.id);
         
-        while(peopleInRoom != 0){
-            // printf("%d Writer still waiting\n", i.id);
-            pthread_cond_wait(&cond, &mtx);
-
-        }
+        while(peopleInRoom != 0)pthread_cond_wait(&cond, &mtx);
         pthread_mutex_unlock(&mtx);
     }
     
     
 
     /* Print this line when the writer enters the room. */
-    success = -1;
-    // while(success < 0)success = pthread_mutex_trylock(&mtx);
     pthread_mutex_lock(&mtx);
     peopleInRoom++;
     isWriterIn = 1;
@@ -163,10 +120,8 @@ void* writer(void* p) {
     
     /* Execute this line when it is safe to do so. */
     write_documents(i.delay, i.id);
-    success = -1;
 
     /* Print this line when the writer leaves the room. */
-    // while(success < 0)success = pthread_mutex_trylock(&mtx);
     pthread_mutex_lock(&mtx);
     isWriterIn = 0;
     peopleInRoom--;
@@ -174,11 +129,6 @@ void* writer(void* p) {
     pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&mtx);
    
-    // pthread_mutex_unlock(&writerLock);
-    // if(pthread_mutex_destroy(&writerLock) != 0){
-    //     printf("Writer %i cannot destroy its mutex.\n", i.id);
-    // }
-    // printf("---------------------------------------Writer %d closed.\n" , i.id);
     return NULL;
 }
 
@@ -217,21 +167,10 @@ int main(void) {
         int err = pthread_join(threads[i], NULL);
         if (err) { abort(); }
     }
-    // // sleep(3);
-    // int success = 0;
-    // success = pthread_mutex_destroy(&mtx);
-    // printf("%d\n", success);
-    // if( success != 0)puts("Mutex mtx destroy failed!");
-    // // printf("%d\n", pthread_mutex_destroy(&mtx));
-    // if(pthread_cond_destroy(&cond) != 0)puts("Condition cond destroy failed!");
-    // pthread_mutex_destroy(&mtx);
-    // free(mtx);
-    // pthread_cond_destroy(&cond);
-    // free(cond);
-    // while(pthread_mutex_destroy(&mtx) != 0)puts("Mutex destroyed failed.");
+
     printf("Mutex destroyed: %s\n",strerror(pthread_mutex_destroy(&mtx)));
     printf("Condition destroyed: %s\n",strerror(pthread_cond_destroy(&cond)));
+
     return 1;
-    
 }
 
